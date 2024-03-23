@@ -1,6 +1,14 @@
 pipeline {
     agent any
     stages {
+        stage('Build') {
+            steps {
+                echo 'Running build automation'
+                sh 'chmod +x gradlew'
+                sh './gradlew build --no-daemon'
+                archiveArtifacts artifacts: 'dist/reactApp'
+            }
+        }
         stage('OWASP Dependency-Check Vulnerabilities') {
             steps {
                 dependencyCheck additionalArguments: ''' 
@@ -11,14 +19,6 @@ pipeline {
         
                 dependencyCheckPublisher pattern: 'dependency-check-report.xml'
           }
-        }
-        stage('Build') {
-            steps {
-                echo 'Running build automation'
-                sh 'chmod +x gradlew'
-                sh './gradlew build --no-daemon'
-                archiveArtifacts artifacts: 'dist/reactApp'
-            }
         }
         stage('Build Docker Image') {
             when {
