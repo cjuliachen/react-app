@@ -9,10 +9,6 @@ pipeline {
                 archiveArtifacts artifacts: 'dist/reactApp'
             }
         }
-        stage('Initialize Docker'){
-            def dockerHome = tool 'myDocker'
-            env.PATH = "${dockerHome}/bin:${env.PATH}"
-        }
         stage('Build Docker Image') {
             when {
                 branch 'main'
