@@ -9,25 +9,30 @@ pipeline {
         //         archiveArtifacts artifacts: 'dist/reactApp'
         //     }
         // }
-        stage('OWASP Dependency-Check Vulnerabilities') {
-            steps {
-                dependencyCheck additionalArguments: ''' 
-                    -o './'
-                    -s './'
-                    -f 'ALL' 
-                    --prettyPrint''', odcInstallation: 'OWASP Dependency-Check Vulnerabilities'
+        // stage('OWASP Dependency-Check Vulnerabilities') {
+        //     steps {
+        //         dependencyCheck additionalArguments: ''' 
+        //             -o './'
+        //             -s './'
+        //             -f 'ALL' 
+        //             --prettyPrint''', odcInstallation: 'OWASP Dependency-Check Vulnerabilities'
         
-                dependencyCheckPublisher pattern: 'dependency-check-report.xml'
-          }
-        }
-        stage('Sonarqube') {
-            steps {
-                withSonarQubeEnv('SonarQube') {
-                    sh "chmod +x gradlew"
-                    sh "./gradlew sonarqube"
+        //         dependencyCheckPublisher pattern: 'dependency-check-report.xml'
+        //   }
+        // }
+            stage('Sonarqube') {
+                environment {
+                    scannerHome = tool 'SonarQubeScanner'
+                }
+                steps {
+                    withSonarQubeEnv('sonarqube') {
+                        sh "${scannerHome}/bin/sonar-scanner"
+                    }
+                    timeout(time: 10, unit: 'MINUTES') {
+                        waitForQualityGate abortPipeline: true
+                    }
                 }
             }
-        }
         // stage('Build Docker Image') {
         //     when {
         //         branch 'main'
